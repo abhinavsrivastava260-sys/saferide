@@ -61,10 +61,10 @@ function baseMap(el) {
   return map;
 }
 
-function dotIcon(color, label = '') {
+function dotIcon(color, label = '', ink = '#fff') {
   return L.divIcon({
     className: '',
-    html: `<div style="background:${color};color:#fff;width:26px;height:26px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${label}</div>`,
+    html: `<div style="background:${color};color:${ink};width:26px;height:26px;border-radius:50%;border:2px solid #0b0b0c;box-shadow:0 0 0 2px rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font:600 11px ui-monospace,monospace">${label}</div>`,
     iconSize: [26, 26], iconAnchor: [13, 13],
   });
 }
@@ -73,10 +73,22 @@ async function drawZones(map, layer) {
   const zones = await api('GET', '/zones');
   layer.clearLayers();
   zones.forEach((z, i) => {
-    const colors = ['#0f9d76', '#3366cc', '#c77700', '#8e44ad', '#c0392b', '#16a085'];
-    L.geoJSON(z.boundary, { style: { color: colors[i % colors.length], weight: 2, fillOpacity: 0.06 } })
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    const colors = [accent, '#7cb7ff', '#c4a7ff', '#5eead4', '#fb923c', '#f472b6'];
+    L.geoJSON(z.boundary, { style: { color: colors[i % colors.length], weight: 1.5, fillOpacity: 0.07, dashArray: '4 4' } })
       .bindTooltip(`${esc(z.name)} · ${z.available}/${z.drivers} drivers free`, { sticky: true })
       .addTo(layer);
   });
   return zones;
 }
+
+// Theme picker in the header; the choice is remembered per browser.
+(function setupTheme() {
+  const sel = document.getElementById('themeSel');
+  if (!sel) return;
+  sel.value = document.documentElement.dataset.theme || 'asphalt';
+  sel.addEventListener('change', () => {
+    store.set('theme', sel.value);
+    location.reload();
+  });
+})();

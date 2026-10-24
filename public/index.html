@@ -4,15 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SafeRide</title>
+  <script>try { document.documentElement.dataset.theme = JSON.parse(localStorage.getItem('theme')) || 'asphalt'; } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
   <header class="top">
-    <div class="brand"><span class="dot"></span> SafeRide</div>
-    <span class="tagline small">Concurrency-safe ride booking</span>
+    <div class="brand"><span class="mark">S</span>SafeRide</div>
+    <span class="tagline small">Vellore · Katpadi · Gandhi Nagar</span>
     <div class="spacer"></div>
-    <span class="who hidden" id="who"><span class="conn" id="conn"></span><span id="whoName"></span></span>
+    <select class="theme" id="themeSel" title="Theme">
+      <option value="asphalt">Asphalt</option><option value="nightshift">Night shift</option><option value="neon">Neon</option>
+    </select>
+        <span class="who hidden" id="who"><span class="conn" id="conn"></span><span id="whoName"></span></span>
     <a href="/admin.html">Admin</a>
     <button class="link hidden" id="logout">Log out</button>
   </header>
@@ -20,8 +27,8 @@
   <!-- Login / register -->
   <section id="authView" class="auth hidden">
     <div class="hero">
-      <h1>Book rides that never double-book</h1>
-      <p class="muted">Every rule (no overlapping slots, valid ride states, regular drivers) is enforced by PostgreSQL itself.</p>
+      <h1>Get a ride.<br>Keep your driver.</h1>
+      <p class="muted">Book a cab in seconds, save the drivers you trust, and set up your weekday pickups once.</p>
     </div>
     <div class="card">
       <div class="tabs" id="authTabs">
@@ -32,11 +39,13 @@
         <div class="field"><label>Email</label><input name="email" type="email" required></div>
         <div class="field"><label>Password</label><input name="password" type="password" required></div>
         <button class="btn primary block">Log in</button>
-        <div class="demo-logins">Demo accounts (password <b>password</b>):<br>
-          <button type="button" class="btn sm" data-demo="abc@x.in">abc · rider</button>
-          <button type="button" class="btn sm" data-demo="sneha@x.in">Sneha · rider</button>
-          <button type="button" class="btn sm" data-demo="xyz@x.in">xyz · driver</button>
-          <button type="button" class="btn sm" data-demo="meena@x.in">Meena · driver</button>
+        <div class="demo-logins">Demo accounts, password <code>password</code>
+          <div class="row">
+            <button type="button" class="btn sm" data-demo="abc@x.in">abc (rider)</button>
+            <button type="button" class="btn sm" data-demo="sneha@x.in">Sneha (rider)</button>
+            <button type="button" class="btn sm" data-demo="xyz@x.in">xyz (driver)</button>
+            <button type="button" class="btn sm" data-demo="meena@x.in">Meena (driver)</button>
+          </div>
         </div>
       </form>
       <form id="registerForm" class="stack hidden">

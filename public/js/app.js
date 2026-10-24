@@ -68,9 +68,9 @@ function showRideOnMap(ride) {
   if (!ride) return;
   const p = [ride.pickup_lat, ride.pickup_lng];
   const d = [ride.drop_lat, ride.drop_lng];
-  L.polyline([p, d], { color: '#12324f', dashArray: '6 6', weight: 3 }).addTo(S.rideLayer);
-  L.marker(p, { icon: dotIcon('#0f9d76', 'P') }).bindTooltip('Pickup').addTo(S.rideLayer);
-  L.marker(d, { icon: dotIcon('#d64545', 'D') }).bindTooltip('Drop').addTo(S.rideLayer);
+  L.polyline([p, d], { color: '#e7e5e4', dashArray: '2 6', weight: 2.5 }).addTo(S.rideLayer);
+  L.marker(p, { icon: dotIcon('#4ade80', 'P', '#04210f') }).bindTooltip('Pickup').addTo(S.rideLayer);
+  L.marker(d, { icon: dotIcon('#ff6b5e', 'D', '#2a0703') }).bindTooltip('Drop').addTo(S.rideLayer);
 }
 
 // ---------------- socket ----------------
@@ -147,7 +147,7 @@ function rideCardHtml(r) {
         <div style="margin-top:12px"><label>Chat with ${rider ? esc(r.driver_name) : esc(r.rider_name)}</label>
           <div class="chat"><div class="msgs"></div>
             <form><input type="text" placeholder="Message…" maxlength="2000">
-              <label class="file" title="Send an image">📎<input type="file" accept="image/*" hidden></label>
+              <label class="file" title="Send an image"><svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5l-8.6 8.6a5 5 0 01-7.1-7.1l8.6-8.6a3.3 3.3 0 014.7 4.7l-8.6 8.6a1.7 1.7 0 01-2.4-2.4l7.9-7.9"/></svg><input type="file" accept="image/*" hidden></label>
               <button class="btn primary sm">Send</button></form></div></div>` : ''}
       <details style="margin-top:10px" data-events><summary class="small muted">Status history (ride_events)</summary><ol class="events small"></ol></details>
       ${['completed', 'cancelled'].includes(r.status) || S.selectedRideId ? '<button class="btn sm" style="margin-top:8px" data-dismiss>Close</button>' : ''}
@@ -216,7 +216,7 @@ async function setupChat(chat, ride) {
 
 function appendMessage(m) {
   const chat = document.querySelector(`.chat[data-ride="${m.ride_id}"]`);
-  if (!chat) { if (m.sender_id !== S.me.user_id) toast(`💬 ${m.sender_name}: ${m.content || 'sent an image'}`); return; }
+  if (!chat) { if (m.sender_id !== S.me.user_id) toast(`${m.sender_name}: ${m.content || 'sent an image'}`); return; }
   const box = $('.msgs', chat);
   if ($(`[data-mid="${m.message_id}"]`, box)) return;
   const div = document.createElement('div');
@@ -308,8 +308,8 @@ function riderMapClick({ lat, lng }) {
 
 function drawPoints() {
   S.pointLayer.clearLayers();
-  if (S.pickup) L.marker([S.pickup.lat, S.pickup.lng], { icon: dotIcon('#0f9d76', 'P') }).addTo(S.pointLayer);
-  if (S.drop) L.marker([S.drop.lat, S.drop.lng], { icon: dotIcon('#d64545', 'D') }).addTo(S.pointLayer);
+  if (S.pickup) L.marker([S.pickup.lat, S.pickup.lng], { icon: dotIcon('#4ade80', 'P', '#04210f') }).addTo(S.pointLayer);
+  if (S.drop) L.marker([S.drop.lat, S.drop.lng], { icon: dotIcon('#ff6b5e', 'D', '#2a0703') }).addTo(S.pointLayer);
 }
 
 async function renderRider() {
@@ -373,7 +373,7 @@ async function driverMapClick({ lat, lng }) {
 
 function drawCar() {
   if (S.me.lat == null) return;
-  if (!S.carMarker) S.carMarker = L.marker([S.me.lat, S.me.lng], { icon: dotIcon('#12324f', '🚗') }).bindTooltip('You').addTo(S.map);
+  if (!S.carMarker) S.carMarker = L.marker([S.me.lat, S.me.lng], { icon: dotIcon('#f5f5f4', '', '#111') }).bindTooltip('You').addTo(S.map);
   else S.carMarker.setLatLng([S.me.lat, S.me.lng]);
 }
 

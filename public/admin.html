@@ -4,6 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SafeRide Admin</title>
+  <script>try { document.documentElement.dataset.theme = JSON.parse(localStorage.getItem('theme')) || 'asphalt'; } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
   <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
   <style>
@@ -11,8 +15,8 @@
     .admin .tabs { max-width: 720px; }
     #zoneMap { height: 420px; border-radius: var(--radius); }
     .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-    .stat { background: var(--soft); border-radius: 10px; padding: 10px; }
-    .stat b { display: block; font-size: 20px; }
+    .stat { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+    .stat b { display: block; font: 500 20px var(--mono); }
     .proof { border-left: 4px solid var(--line); }
     .proof.ok { border-left-color: var(--accent); }
     .proof.bad { border-left-color: var(--bad); }
@@ -23,9 +27,12 @@
 </head>
 <body>
   <header class="top">
-    <div class="brand"><span class="dot"></span> SafeRide · Admin</div>
+    <div class="brand"><span class="mark">S</span>SafeRide <span style="color:var(--header-muted);font-weight:400">admin</span></div>
     <div class="spacer"></div>
-    <a href="/">Rider / driver app</a>
+    <select class="theme" id="themeSel" title="Theme">
+      <option value="asphalt">Asphalt</option><option value="nightshift">Night shift</option><option value="neon">Neon</option>
+    </select>
+        <a href="/">Rider / driver app</a>
     <button class="link hidden" id="logout">Lock</button>
   </header>
 
