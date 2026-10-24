@@ -8,7 +8,7 @@ const adminApi = (method, path, body) => api(method, '/admin' + path, body, { 'x
 function table(rows, cols, fmt = {}) {
   if (!rows.length) return '<div class="empty">No rows.</div>';
   cols = cols || Object.keys(rows[0]);
-  return `<table class="t"><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>
+  return `<table class="dt"><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>
     ${rows.map((r) => `<tr>${cols.map((c) => `<td>${fmt[c] ? fmt[c](r[c], r) : esc(r[c] === null ? 'NULL' : typeof r[c] === 'object' ? JSON.stringify(r[c]) : r[c])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 
@@ -17,6 +17,7 @@ async function open() {
   $('#keyView').classList.add('hidden');
   $('#adminView').classList.remove('hidden');
   $('#logout').classList.remove('hidden');
+  $('#adminTabs').classList.remove('hidden');
   $$('#adminTabs button').forEach((b) => b.addEventListener('click', () => {
     $$('#adminTabs button').forEach((x) => x.classList.toggle('active', x === b));
     $$('[data-pane]').forEach((p) => p.classList.toggle('hidden', p.dataset.pane !== b.dataset.tab));
@@ -27,18 +28,18 @@ async function open() {
 
 async function loadOverview() {
   const o = await adminApi('GET', '/overview');
-  $('#tableStats').innerHTML = o.tables.map((t) => `<div class="stat"><span class="small muted">${esc(t.name)}</span><b>${t.rows}</b></div>`).join('');
-  $('#driverStats').innerHTML = o.drivers.map((d) => `${pill(d.status)} <b>${d.n}</b>`).join(' &nbsp; ') || '<span class="muted">No drivers</span>';
+  $('#tableStats').innerHTML = o.tables.map((t) => `<div><span class="label">${esc(t.name)}</span><b>${t.rows}</b></div>`).join('');
+  $('#driverStats').innerHTML = o.drivers.map((d) => `${st(d.status)} <b>${d.n}</b>`).join(' &nbsp; ') || '<span class="muted">No drivers</span>';
   $('#liveRides').innerHTML = table(o.active, ['rider_name', 'driver_name', 'zone_name', 'booking_type', 'status', 'slot_start', 'slot_end'],
-    { status: (v) => pill(v), slot_start: fmtTime, slot_end: fmtClock });
+    { status: (v) => st(v), slot_start: fmtTime, slot_end: fmtClock });
 }
 
 // ---------- proofs ----------
 function verifyHtml(results) {
   const passed = results.filter((r) => r.pass).length;
-  return `<p><span class="pill ${passed === results.length ? 'pass' : 'fail'}">${passed} / ${results.length} behaved as designed</span></p>
-    ${results.map((r) => `<div class="card proof ${r.pass ? 'ok' : 'bad'}">
-      <div class="row"><b class="grow">${esc(r.id)} · ${esc(r.title)}</b>${r.rule ? `<span class="pill">${esc(r.rule)}</span>` : ''}<span class="pill ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span></div>
+  return `<p><span class="st ${passed === results.length ? 'pass' : 'fail'}">${passed} / ${results.length} behaved as designed</span></p>
+    ${results.map((r) => `<div class="proof">
+      <div class="head"><span class="mono small red">${esc(r.id)}</span><b>${esc(r.title)}</b>${r.rule ? `<span class="st">${esc(r.rule)}</span>` : ''}<span class="st ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span></div>
       <pre class="code">${esc(r.sql.trim())}</pre>
       ${r.expected ? `<div class="small"><span class="muted">Expected:</span> ${esc(r.expected)}</div>` : ''}
       <div class="small"><span class="muted">Got:</span> <b>${esc(r.outcome)}</b></div>
@@ -46,7 +47,7 @@ function verifyHtml(results) {
     </div>`).join('')}`;
 }
 
-const countsHtml = (c) => Object.entries(c).map(([k, v]) => `<span class="pill">${esc(k.replace(/_/g, ' '))}: ${v}</span>`).join(' ');
+const countsHtml = (c) => Object.entries(c).map(([k, v]) => `<span class="st">${esc(k.replace(/_/g, ' '))}: ${v}</span>`).join(' ');
 
 function run(btnSel, outSel, fn) {
   const btn = $(btnSel);
@@ -60,20 +61,20 @@ function setupProofs() {
   run('#runVerify', '#verifyOut', async () => verifyHtml(await adminApi('POST', '/proofs/verify')));
   run('#runDouble', '#doubleOut', async () => {
     const r = await adminApi('POST', '/proofs/double-booking', { n: Number($('#dbN').value) });
-    return `<p><span class="pill ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span> ${r.attempts} attempts in ${r.ms} ms</p>
+    return `<p><span class="st ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span> ${r.attempts} attempts in ${r.ms} ms</p>
       <p>${countsHtml(r.counts)}</p><p class="small">The driver ends up holding <b>${r.accepted_rides_for_driver}</b> accepted ride(s).</p>
       ${r.sample_error ? `<pre class="code">${esc(r.sample_error)}</pre>` : ''}`;
   });
   run('#runMatch', '#matchOut', async () => {
     const r = await adminApi('POST', '/proofs/matching', { riders: Number($('#mR').value), drivers: Number($('#mD').value) });
-    return `<p><span class="pill ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span> ${r.ms} ms</p>
+    return `<p><span class="st ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span> ${r.ms} ms</p>
       <p class="small">${r.matched} riders matched to <b>${r.distinct_drivers}</b> distinct drivers. ${r.told_to_retry} riders told to retry. ${r.errors} errors. No driver was assigned twice: ${r.matched === r.distinct_drivers ? 'yes' : 'NO'}.</p>`;
   });
   run('#runExplain', '#explainOut', async () => {
     const r = await adminApi('POST', '/proofs/explain', {});
     const max = Math.max(r.before.execution_ms, r.after.execution_ms);
-    return `<p><span class="pill ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span> ${r.drivers.toLocaleString()} drivers</p>
-      <table class="t"><tr><td>Without index</td><td style="width:50%"><div class="bar" style="width:${(r.before.execution_ms / max) * 100}%"></div></td><td><b>${r.before.execution_ms} ms</b></td></tr>
+    return `<p><span class="st ${r.pass ? 'pass' : 'fail'}">${r.pass ? 'PASS' : 'FAIL'}</span> ${r.drivers.toLocaleString()} drivers</p>
+      <table class="dt"><tr><td>Without index</td><td style="width:50%"><div class="bar" style="width:${(r.before.execution_ms / max) * 100}%"></div></td><td><b>${r.before.execution_ms} ms</b></td></tr>
       <tr><td>With GiST index</td><td><div class="bar" style="width:${(r.after.execution_ms / max) * 100}%"></div></td><td><b>${r.after.execution_ms} ms</b></td></tr></table>
       <details><summary class="small muted">Plan without index</summary><pre class="code">${esc(r.before.plan)}</pre></details>
       <details><summary class="small muted">Plan with index</summary><pre class="code">${esc(r.after.plan)}</pre></details>`;
@@ -81,7 +82,7 @@ function setupProofs() {
   run('#runIso', '#isoOut', async () => {
     const rs = await adminApi('POST', '/proofs/isolation', { n: 50 });
     return table(rs.map((r) => ({ level: r.isolation, result: r.pass ? 'PASS' : 'FAIL', ...r.counts, ms: r.ms, rides_held: r.accepted_rides_for_driver })),
-      null, { result: (v) => `<span class="pill ${v === 'PASS' ? 'pass' : 'fail'}">${v}</span>` });
+      null, { result: (v) => `<span class="st ${v === 'PASS' ? 'pass' : 'fail'}">${v}</span>` });
   });
 }
 
@@ -89,7 +90,7 @@ function setupProofs() {
 async function loadReports() {
   const r = await adminApi('GET', '/reports');
   $('#repCancel').innerHTML = table(r.cancellation, null, { cancellation_pct: (v) => `${v ?? 0}%` });
-  $('#repUtil').innerHTML = table(r.utilisation, null, { status: (v) => pill(v), earnings: money, utilisation_pct: (v) => `${v}%` });
+  $('#repUtil').innerHTML = table(r.utilisation, null, { status: (v) => st(v), earnings: money, utilisation_pct: (v) => `${v}%` });
   const max = Math.max(1, ...r.perZoneDay.map((x) => x.rides));
   $('#repZoneDay').innerHTML = table(r.perZoneDay, ['day', 'zone', 'rides', 'completed', 'cancelled'], {
     day: (v) => esc(String(v).slice(0, 10)),
@@ -128,8 +129,8 @@ async function loadZones() {
 function drawDraft() {
   draftLayer.clearLayers();
   const latlngs = corners.map(([lng, lat]) => [lat, lng]);
-  if (latlngs.length) L.polygon(latlngs, { color: '#c0392b', dashArray: '4 4' }).addTo(draftLayer);
-  latlngs.forEach((p) => L.circleMarker(p, { radius: 4, color: '#c0392b' }).addTo(draftLayer));
+  if (latlngs.length) L.polygon(latlngs, { color: '#ff5a36', dashArray: '4 4' }).addTo(draftLayer);
+  latlngs.forEach((p) => L.circleMarker(p, { radius: 4, color: '#ff5a36' }).addTo(draftLayer));
   $('#zoneCount').textContent = `${corners.length} corners`;
 }
 
@@ -151,5 +152,6 @@ $('#keyForm').addEventListener('submit', async (e) => {
   try { await open(); } catch (err) { toast(err.message, true); }
 });
 $('#logout').addEventListener('click', () => { store.del('adminKey'); location.reload(); });
+$$('[data-clock]').forEach(startClock);
 setupProofs();
 if (store.get('adminKey')) open().catch(() => store.del('adminKey'));

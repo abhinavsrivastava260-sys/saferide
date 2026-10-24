@@ -4,177 +4,165 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SafeRide</title>
-  <script>try { document.documentElement.dataset.theme = JSON.parse(localStorage.getItem('theme')) || 'asphalt'; } catch (e) {}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap">
   <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="brand"><span class="mark">S</span>SafeRide</div>
-    <span class="tagline small">Vellore · Katpadi · Gandhi Nagar</span>
-    <div class="spacer"></div>
-    <select class="theme" id="themeSel" title="Theme">
-      <option value="asphalt">Asphalt</option><option value="nightshift">Night shift</option><option value="neon">Neon</option>
-    </select>
-        <span class="who hidden" id="who"><span class="conn" id="conn"></span><span id="whoName"></span></span>
-    <a href="/admin.html">Admin</a>
-    <button class="link hidden" id="logout">Log out</button>
-  </header>
 
-  <!-- Login / register -->
-  <section id="authView" class="auth hidden">
-    <div class="hero">
-      <h1>Get a ride.<br>Keep your driver.</h1>
-      <p class="muted">Book a cab in seconds, save the drivers you trust, and set up your weekday pickups once.</p>
-    </div>
-    <div class="card">
-      <div class="tabs" id="authTabs">
-        <button class="active" data-tab="login">Log in</button>
-        <button data-tab="register">Register</button>
+  <!-- ============ log in / register ============ -->
+  <section id="authView" class="page auth hidden">
+    <div class="col">
+      <div class="mast">
+        <span class="name">SafeRide</span>
+        <nav><a href="/admin.html" class="muted">Admin</a><span class="clock" data-clock></span></nav>
       </div>
-      <form id="loginForm" class="stack">
-        <div class="field"><label>Email</label><input name="email" type="email" required></div>
-        <div class="field"><label>Password</label><input name="password" type="password" required></div>
-        <button class="btn primary block">Log in</button>
-        <div class="demo-logins">Demo accounts, password <code>password</code>
+      <div class="kicker">Vellore · Katpadi · Gandhi Nagar · Vellore Town</div>
+      <h1 class="display">Get a ride.<br><i>Keep your driver.</i></h1>
+      <p class="lede">Book a cab in seconds, keep the drivers you trust, and set up your weekday pickups once.</p>
+
+      <div class="switch" id="authTabs">
+        <button class="active" data-tab="login">Log in</button>
+        <button data-tab="register">Create an account</button>
+      </div>
+
+      <form id="loginForm">
+        <div class="f"><div class="k">Email</div><input name="email" type="email" autocomplete="username" required><span></span></div>
+        <div class="f"><div class="k">Password</div><input name="password" type="password" autocomplete="current-password" required><span></span></div>
+        <div class="act"><button class="btn">Log in</button></div>
+        <div class="demo">
+          <div class="label">Demo accounts · password “password”</div>
           <div class="row">
-            <button type="button" class="btn sm" data-demo="abc@x.in">abc (rider)</button>
-            <button type="button" class="btn sm" data-demo="sneha@x.in">Sneha (rider)</button>
-            <button type="button" class="btn sm" data-demo="xyz@x.in">xyz (driver)</button>
-            <button type="button" class="btn sm" data-demo="meena@x.in">Meena (driver)</button>
+            <button type="button" data-demo="abc@x.in">abc <span>rider</span></button>
+            <button type="button" data-demo="sneha@x.in">Sneha <span>rider</span></button>
+            <button type="button" data-demo="xyz@x.in">xyz <span>driver</span></button>
+            <button type="button" data-demo="meena@x.in">Meena <span>driver</span></button>
           </div>
         </div>
       </form>
-      <form id="registerForm" class="stack hidden">
-        <div class="field"><label>I am a</label>
-          <select name="role"><option value="rider">Rider</option><option value="driver">Driver</option></select></div>
-        <div class="grid2">
-          <div class="field"><label>Name</label><input name="name" required></div>
-          <div class="field"><label>Phone</label><input name="phone"></div>
+
+      <form id="registerForm" class="hidden">
+        <div class="f"><div class="k">I am a</div>
+          <select name="role"><option value="rider">Rider</option><option value="driver">Driver</option></select><span></span></div>
+        <div class="f"><div class="k">Name</div><input name="name" required><span></span></div>
+        <div class="f"><div class="k">Phone</div><input name="phone"><span></span></div>
+        <div class="f"><div class="k">Email</div><input name="email" type="email" required><span></span></div>
+        <div class="f"><div class="k">Password</div><input name="password" type="password" minlength="6" placeholder="6 characters or more" required><span></span></div>
+        <div class="f riderOnly"><div class="k">Pays by</div>
+          <select name="preferred_payment"><option>cash</option><option>upi</option><option>card</option></select><span></span></div>
+        <div class="driverOnly hidden">
+          <div class="f"><div class="k">Licence</div><input name="license_number"><span></span></div>
+          <div class="f"><div class="k">Plate</div><input name="plate_number"><span></span></div>
+          <div class="f"><div class="k">Vehicle</div>
+            <select name="vehicle_type"><option>bike</option><option>auto</option><option>hatchback</option><option selected>sedan</option><option>suv</option></select><span></span></div>
         </div>
-        <div class="field"><label>Email</label><input name="email" type="email" required></div>
-        <div class="field"><label>Password (6+ characters)</label><input name="password" type="password" minlength="6" required></div>
-        <div class="field riderOnly"><label>Preferred payment</label>
-          <select name="preferred_payment"><option>cash</option><option>upi</option><option>card</option></select></div>
-        <div class="driverOnly hidden stack">
-          <div class="grid2">
-            <div class="field"><label>Licence number</label><input name="license_number"></div>
-            <div class="field"><label>Plate number</label><input name="plate_number"></div>
-          </div>
-          <div class="field"><label>Vehicle type</label>
-            <select name="vehicle_type"><option>bike</option><option>auto</option><option>hatchback</option><option selected>sedan</option><option>suv</option></select></div>
-        </div>
-        <button class="btn primary block">Create account</button>
+        <div class="act"><button class="btn">Create account</button></div>
       </form>
+    </div>
+    <div class="right">
+      <div class="plate"><div id="authMap" class="map"></div></div>
+      <div class="figcap"><span><i>Fig. 1</i> &nbsp;The three service zones</span><span class="mono small">VELLORE</span></div>
     </div>
   </section>
 
-  <!-- Main app -->
-  <section id="appView" class="layout hidden">
-    <aside class="side">
-      <!-- Rider -->
-      <div id="riderPanel" class="hidden">
-        <div class="tabs" id="riderTabs">
-          <button class="active" data-tab="book">Ride</button>
-          <button data-tab="schedule">Schedule</button>
-          <button data-tab="regulars">Regulars</button>
-          <button data-tab="history">History</button>
-        </div>
-
-        <div data-pane="book">
-          <div id="riderCurrent"></div>
-          <div class="card" id="bookCard">
-            <h2>Where to?</h2>
-            <p class="muted small">Tap a box, then click the map. The zone is worked out from the pickup point.</p>
-            <div class="points">
-              <div class="point armed" data-point="pickup"><b><span class="dotg"></span>Pickup</b><span class="small muted" id="pickupTxt">Click the map</span></div>
-              <div class="point" data-point="drop"><b><span class="dotr"></span>Drop</b><span class="small muted" id="dropTxt">Click the map</span></div>
-            </div>
-            <div style="margin-top:12px"><button class="btn primary block" id="requestBtn">Request ride now</button></div>
-            <p class="small muted" style="margin-bottom:0">Your regular driver for the zone, if free, gets the offer first. Otherwise the nearest free driver does.</p>
-          </div>
-        </div>
-
-        <div data-pane="schedule" class="hidden">
-          <div class="card stack">
-            <h2>Book a future slot</h2>
-            <p class="muted small" style="margin:0">Only with one of your regular drivers. Uses the pickup and drop set on the Ride tab. Overlapping slots are refused by the database.</p>
-            <div class="field"><label>Regular driver</label><select id="schedDriver"></select></div>
-            <div class="grid2">
-              <div class="field"><label>Start</label><input type="datetime-local" id="schedStart"></div>
-              <div class="field"><label>Minutes</label><input type="number" id="schedMinutes" value="30" min="5" max="240"></div>
-            </div>
-            <button class="btn primary block" id="schedBtn">Book slot</button>
-          </div>
-          <div class="card stack">
-            <h2>Repeat every week</h2>
-            <div class="field"><label>Regular driver</label><select id="recDriver"></select></div>
-            <div class="field"><label>Days</label><div class="days" id="recDays"></div></div>
-            <div class="grid2">
-              <div class="field"><label>Time</label><input type="time" id="recTime" value="08:30"></div>
-              <div class="field"><label>Minutes</label><input type="number" id="recMinutes" value="30" min="5" max="240"></div>
-            </div>
-            <button class="btn primary block" id="recBtn">Create weekly booking</button>
-            <div id="recList"></div>
-          </div>
-          <div class="card"><h2>Upcoming</h2><div id="upcomingList"></div></div>
-        </div>
-
-        <div data-pane="regulars" class="hidden">
-          <div class="card">
-            <h2>Your regular drivers</h2>
-            <p class="muted small">A driver can be added only after a completed ride with him in that zone. The database checks this with a trigger.</p>
-            <div id="regularList"></div>
-          </div>
-        </div>
-
-        <div data-pane="history" class="hidden">
-          <div class="card"><h2>Your rides</h2><div id="riderHistory" class="tablewrap"></div></div>
-        </div>
+  <!-- ============ app ============ -->
+  <section id="appView" class="page hidden">
+    <div class="col">
+      <div class="mast">
+        <span class="name">SafeRide</span>
+        <nav id="nav"></nav>
+      </div>
+      <div class="row small muted" style="justify-content:space-between;margin-top:8px">
+        <span class="whoami"><span class="conn" id="conn"></span><span id="whoName"></span> · <button id="logout">log out</button></span>
+        <span><a href="/admin.html" class="muted small">admin</a> &nbsp;<span class="clock" data-clock></span></span>
       </div>
 
-      <!-- Driver -->
-      <div id="driverPanel" class="hidden">
-        <div class="tabs" id="driverTabs">
-          <button class="active" data-tab="drive">Drive</button>
-          <button data-tab="setup">Zones</button>
-          <button data-tab="history">History</button>
+      <!-- rider: ride -->
+      <div data-pane="ride" class="pane hidden" style="display:flex;flex-direction:column;flex:1">
+        <div class="kicker" id="rKicker"></div>
+        <h1 class="display" id="rTitle"></h1>
+        <div class="fields">
+          <div class="f" data-field="pickup"><div class="k">From</div><div class="v" id="pickupTxt"></div><button class="a" data-arm="pickup">Set</button></div>
+          <div class="f" data-field="drop"><div class="k">To</div><div class="v" id="dropTxt"></div><button class="a" data-arm="drop">Set</button></div>
+          <div class="f"><div class="k">With</div><div class="v" id="withTxt"></div><span></span></div>
         </div>
-        <div data-pane="drive">
-          <div class="card">
-            <div class="row">
-              <div class="grow">
-                <h2 id="drvName" style="margin:0"></h2>
-                <div class="small muted" id="drvVehicle"></div>
-              </div>
-              <span id="drvStatus"></span>
-            </div>
-            <div class="row" style="margin-top:12px">
-              <button class="btn primary grow" id="goOnline">Go online</button>
-              <button class="btn grow" id="goOffline">Go offline</button>
-            </div>
-            <p class="small muted" style="margin-bottom:0">Click the map to move your car (your live location).</p>
-          </div>
-          <div id="offerBox"></div>
-          <div id="driverCurrent"></div>
-          <div class="card"><h2>Upcoming booked slots</h2><div id="drvUpcoming"></div></div>
+        <div class="act" id="bookAct">
+          <button class="btn" id="requestBtn">Request ride</button>
+          <button class="link" data-goto="schedule">or book a slot with your regular</button>
         </div>
-        <div data-pane="setup" class="hidden">
-          <div class="card stack">
-            <h2>Zones you serve</h2>
-            <div id="zoneChecks"></div>
-            <button class="btn primary" id="saveZones">Save zones</button>
-          </div>
-        </div>
-        <div data-pane="history" class="hidden">
-          <div class="card"><h2>Your trips</h2><div id="driverHistory" class="tablewrap"></div></div>
-        </div>
+        <div class="board"><div class="board-in" id="rBoard"></div></div>
       </div>
-    </aside>
-    <div class="mapwrap"><div id="map"></div></div>
+
+      <!-- rider: schedule -->
+      <div data-pane="schedule" class="pane hidden">
+        <div class="kicker">Plan ahead</div>
+        <h1 class="display">Later,<br><i>with someone you trust.</i></h1>
+        <p class="lede">Future slots are booked only with your regular drivers. If the slot overlaps another booking of theirs, the database refuses it.</p>
+        <div class="fields">
+          <div class="f"><div class="k">From</div><div class="v" data-mirror="pickup"></div><button class="a" data-goto="ride">Change</button></div>
+          <div class="f"><div class="k">To</div><div class="v" data-mirror="drop"></div><button class="a" data-goto="ride">Change</button></div>
+          <div class="f"><div class="k">With</div><select id="schedDriver"></select><span></span></div>
+          <div class="f"><div class="k">When</div><input type="datetime-local" id="schedStart"><span></span></div>
+          <div class="f"><div class="k">Minutes</div><input type="number" id="schedMinutes" value="30" min="5" max="240"><span></span></div>
+        </div>
+        <div class="act"><button class="btn" id="schedBtn">Book this slot</button></div>
+
+        <h2 class="section" style="margin-top:46px">Every week</h2>
+        <div class="fields" style="margin-top:8px">
+          <div class="f"><div class="k">On</div><div class="days" id="recDays"></div><span></span></div>
+          <div class="f"><div class="k">At</div><input type="time" id="recTime" value="08:30"><span></span></div>
+          <div class="f"><div class="k">Minutes</div><input type="number" id="recMinutes" value="30" min="5" max="240"><span></span></div>
+          <div class="f"><div class="k">With</div><select id="recDriver"></select><span></span></div>
+        </div>
+        <div class="act"><button class="btn" id="recBtn">Book weekly</button></div>
+        <div id="recList" style="margin-top:30px"></div>
+      </div>
+
+      <!-- rider: regulars -->
+      <div data-pane="regulars" class="pane hidden">
+        <div class="kicker">The drivers you keep</div>
+        <h1 class="display">Your<br><i>regulars.</i></h1>
+        <p class="lede">A driver joins this list after you finish a ride with them in a zone. When you book in that zone, they get the offer first.</p>
+        <div id="regularList" class="tablewrap" style="margin-top:24px"></div>
+      </div>
+
+      <!-- shared: history -->
+      <div data-pane="history" class="pane hidden">
+        <div class="kicker">Ride history</div>
+        <h1 class="display">Every ride,<br><i>on record.</i></h1>
+        <p class="lede">Open any ride to see its full status history, written by the database on every change.</p>
+        <div id="historyList" class="tablewrap" style="margin-top:24px"></div>
+      </div>
+
+      <!-- driver: drive -->
+      <div data-pane="drive" class="pane hidden" style="display:flex;flex-direction:column;flex:1">
+        <div class="kicker" id="dKicker"></div>
+        <h1 class="display" id="drvName"></h1>
+        <div class="fields">
+          <div class="f"><div class="k">Status</div><div class="v" id="drvStatus"></div><button class="a" id="toggleOnline"></button></div>
+          <div class="f" data-field="position"><div class="k">Position</div><div class="v" id="drvPos"></div><button class="a" data-arm="position">Set</button></div>
+          <div class="f"><div class="k">Zones</div><div class="v" id="drvZones"></div><button class="a" data-goto="zones">Edit</button></div>
+        </div>
+        <div class="board"><div class="board-in" id="dBoard"></div></div>
+      </div>
+
+      <!-- driver: zones -->
+      <div data-pane="zones" class="pane hidden">
+        <div class="kicker">Service area</div>
+        <h1 class="display">Where<br><i>you drive.</i></h1>
+        <p class="lede">You only get offers, and can only accept rides, in the zones ticked here.</p>
+        <div class="checks" id="zoneChecks" style="margin-top:20px"></div>
+        <div class="act"><button class="btn" id="saveZones">Save zones</button></div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="plate"><div id="map"></div><div class="map-hint hidden" id="mapHint"></div></div>
+      <div class="figcap"><span><i>Fig. 1</i> &nbsp;<span id="figText">Service zones</span></span><span class="mono small" id="figRight"></span></div>
+      <div class="deps" id="lower"></div>
+    </div>
   </section>
 
   <script src="/vendor/leaflet/leaflet.js"></script>
