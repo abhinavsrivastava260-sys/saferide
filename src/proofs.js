@@ -11,9 +11,9 @@ const SLOT = ["'2030-01-07 09:00+05:30'", "'2030-01-07 09:30+05:30'"];
 // ---------- Section 5.6: sample data and verification (all rolled back afterwards) ----------
 const VERIFY_SETUP = `
 INSERT INTO users (user_id, name, email, password_hash, role) VALUES
- ('a0000000-0000-0000-0000-000000000001', 'Arjun',   'arjun@verify.test',   'x', 'rider'),
+ ('a0000000-0000-0000-0000-000000000001', 'abc',   'abc@verify.test',   'x', 'rider'),
  ('a0000000-0000-0000-0000-000000000002', 'Sneha',   'sneha@verify.test',   'x', 'rider'),
- ('b0000000-0000-0000-0000-000000000001', 'Karthik', 'karthik@verify.test', 'x', 'driver'),
+ ('b0000000-0000-0000-0000-000000000001', 'xyz', 'xyz@verify.test', 'x', 'driver'),
  ('b0000000-0000-0000-0000-000000000002', 'Meena',   'meena@verify.test',   'x', 'driver');
 INSERT INTO riders (user_id) VALUES ('a0000000-0000-0000-0000-000000000001'), ('a0000000-0000-0000-0000-000000000002');
 INSERT INTO drivers (user_id, license_number, vehicle_type, plate_number, status, location) VALUES
@@ -87,9 +87,9 @@ SELECT ${A2}, zone_id, ST_MakePoint(79.13, 12.97)::geography, ST_MakePoint(79.15
   { id: 'Extra 7', rule: 'BR-09', title: 'A score outside 1-5 on the completed ride',
     sql: `INSERT INTO ratings (ride_id, driver_score) VALUES (${R1}, 6);`,
     expect: '23514', expected: 'ERROR: violates check constraint on driver_score' },
-  { id: 'Extra 8', rule: 'BR-10', title: 'Making rider Arjun a driver as well',
+  { id: 'Extra 8', rule: 'BR-10', title: 'Making rider abc a driver as well',
     sql: `INSERT INTO drivers (user_id, license_number, vehicle_type, plate_number) VALUES (${A1}, 'VERIFYX', 'bike', 'VFX1');`,
-    expect: '23503', expected: 'ERROR: violates foreign key (user_id, role) -> users: Arjun\'s role is rider' },
+    expect: '23503', expected: 'ERROR: violates foreign key (user_id, role) -> users: abc\'s role is rider' },
   { id: 'Extra 9', rule: 'BR-06', title: 'A recurring booking with a driver who is not a regular',
     sql: `INSERT INTO recurring_bookings (rider_id, driver_id, zone_id, pickup_point, drop_point, time_of_day, duration_minutes)
 SELECT ${A2}, ${D1}, zone_id, ST_MakePoint(79.13, 12.97)::geography, ST_MakePoint(79.15, 12.98)::geography, '08:30', 30

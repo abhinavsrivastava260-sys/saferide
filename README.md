@@ -33,14 +33,14 @@ npm run setup                    # applies db/migrations in order, then loads de
 npm start                        # http://localhost:3000
 ```
 
-Demo logins (password `password`): riders `arjun@x.in`, `sneha@x.in`, `priya@x.in`, `rahul@x.in`;
-drivers `karthik@x.in`, `meena@x.in`, `ravi@x.in` and five more. The admin page is
+Demo logins (password `password`): riders `abc@x.in`, `sneha@x.in`, `priya@x.in`, `rahul@x.in`;
+drivers `xyz@x.in`, `meena@x.in`, `ravi@x.in` and five more. The admin page is
 `/admin.html` with the key from `.env` (default `admin123`). The map tiles come from
 OpenStreetMap, so the browser needs internet access.
 
-To try a full ride, open two browser windows (one normal, one private): log in as Arjun in
-one and Karthik in the other. Arjun clicks the map for pickup and drop and requests a ride;
-Karthik gets a 30 second offer (he is Arjun's regular driver in Katpadi, so he is asked first).
+To try a full ride, open two browser windows (one normal, one private): log in as abc in
+one and xyz in the other. abc clicks the map for pickup and drop and requests a ride;
+xyz gets a 30 second offer (xyz is abc's regular driver in Katpadi, so he is asked first).
 
 ## What is where
 

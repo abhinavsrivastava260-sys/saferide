@@ -10,14 +10,14 @@ const ZONES = [
   ['Vellore Town', box(79.10, 12.90, 79.16, 12.95)],
 ];
 const RIDERS = [
-  ['Arjun', 'arjun@x.in', '9000000001', 'upi'],
+  ['abc', 'abc@x.in', '9000000001', 'upi'],
   ['Sneha', 'sneha@x.in', '9000000002', 'cash'],
   ['Priya', 'priya@x.in', '9000000003', 'card'],
   ['Rahul', 'rahul@x.in', '9000000004', 'upi'],
 ];
 // name, email, licence, vehicle, plate, zones served, lng, lat
 const DRIVERS = [
-  ['Karthik', 'karthik@x.in', 'TN2320250001', 'sedan', 'TN23AB1234', [1, 2], 79.13, 12.97],
+  ['xyz', 'xyz@x.in', 'TN2320250001', 'sedan', 'TN23AB1234', [1, 2], 79.13, 12.97],
   ['Meena', 'meena@x.in', 'TN2320250002', 'auto', 'TN23CD5678', [1], 79.14, 12.96],
   ['Ravi', 'ravi@x.in', 'TN2320250003', 'bike', 'TN23EF1111', [1, 3], 79.12, 12.955],
   ['Lakshmi', 'lakshmi@x.in', 'TN2320250004', 'hatchback', 'TN23GH2222', [2], 79.19, 12.97],
@@ -89,12 +89,12 @@ async function main() {
       await c.query(`INSERT INTO ratings (ride_id, driver_score, rider_score) VALUES ($1,$2,$3)`,
         [rideId, 3 + (i % 3), 4 + (i % 2)]);
     }
-    // Arjun has completed rides with Karthik in Katpadi, so Karthik can be his regular driver (BR-05).
+    // abc has completed rides with xyz in Katpadi, so xyz can be their regular driver (BR-05).
     await c.query('INSERT INTO regular_drivers (rider_id, driver_id, zone_id) VALUES ($1,$2,1)', [riders[0], drivers[0].id]);
     // History rows were written by the system, so the audit events have no actor.
     await c.query('UPDATE ride_events SET event_time = r.requested_at FROM rides r WHERE r.ride_id = ride_events.ride_id');
   });
-  console.log('Seeded. Log in as arjun@x.in (rider) or karthik@x.in (driver), password "password".');
+  console.log('Seeded. Log in as abc@x.in (rider) or xyz@x.in (driver), password "password".');
   await pool.end();
 }
 
