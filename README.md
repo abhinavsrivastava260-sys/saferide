@@ -10,11 +10,14 @@ Socket.io and a plain HTML/JS client) exercises those rules; it does not re-impl
 ## Run it in the browser (no installs): GitHub Codespaces
 
 1. Open the repository on GitHub, click **Code → Codespaces → Create codespace on main**.
-2. Wait for setup to finish (it installs packages, starts PostgreSQL with PostGIS and loads the demo data).
+2. Wait for setup to finish (it installs PostgreSQL with PostGIS inside the codespace, the npm packages and the demo data).
 3. In the terminal, run `npm start`, then open port 3000 from the **Ports** tab.
 
+If setup did not finish, run it by hand: `bash .devcontainer/setup-db.sh && npm install && npm run setup && npm start`.
+
 The same `.devcontainer` folder also works in desktop VS Code with Docker Desktop and the *Dev Containers*
-extension: open the folder and choose **Reopen in Container**.
+extension: open the folder and choose **Reopen in Container**. On any Debian or Ubuntu machine,
+`bash .devcontainer/setup-db.sh` installs and starts the database for you.
 
 ## Run it on your own machine
 

@@ -1,11 +1,9 @@
 {
   "name": "SafeRide (Node + PostgreSQL/PostGIS)",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "app",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
   "forwardPorts": [3000],
   "portsAttributes": { "3000": { "label": "SafeRide", "onAutoForward": "openBrowser" } },
-  "postCreateCommand": "npm install && until pg_isready -h localhost -U postgres 2>/dev/null || node -e \"require('net').connect(5432,'localhost').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))\"; do sleep 1; done && npm run setup",
-  "postAttachCommand": "echo 'Run: npm start   (then open the Ports tab, port 3000)'",
-  "customizations": { "vscode": { "extensions": ["ckolkman.vscode-postgres"] } }
+  "postCreateCommand": "bash .devcontainer/setup-db.sh && npm install && npm run setup",
+  "postStartCommand": "bash .devcontainer/setup-db.sh",
+  "postAttachCommand": "echo 'Type: npm start   (then open port 3000 from the Ports tab)'"
 }
