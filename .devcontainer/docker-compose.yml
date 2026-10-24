@@ -1,0 +1,23 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    # Share the database container's network, so the app reaches Postgres on localhost:5432
+    network_mode: service:db
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/ridebook
+
+  db:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ridebook
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

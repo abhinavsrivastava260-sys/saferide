@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SafeRide Admin</title>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .admin .tabs { max-width: 720px; }
+    #zoneMap { height: 420px; border-radius: var(--radius); }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .stat { background: var(--soft); border-radius: 10px; padding: 10px; }
+    .stat b { display: block; font-size: 20px; }
+    .proof { border-left: 4px solid var(--line); }
+    .proof.ok { border-left-color: var(--accent); }
+    .proof.bad { border-left-color: var(--bad); }
+    .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+    .bar { height: 8px; background: var(--accent); border-radius: 4px; min-width: 2px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="dot"></span> SafeRide · Admin</div>
+    <div class="spacer"></div>
+    <a href="/">Rider / driver app</a>
+    <button class="link hidden" id="logout">Lock</button>
+  </header>
+
+  <section id="keyView" class="auth">
+    <div class="card stack">
+      <h2>Administrator</h2>
+      <p class="muted small" style="margin:0">Enter the admin key from your <code>.env</code> file (default <code>admin123</code>).</p>
+      <form id="keyForm" class="stack"><input type="password" id="adminKey" placeholder="Admin key" required><button class="btn primary block">Open</button></form>
+    </div>
+  </section>
+
+  <section id="adminView" class="admin hidden">
+    <div class="tabs" id="adminTabs">
+      <button class="active" data-tab="overview">Overview</button>
+      <button data-tab="proofs">Proofs</button>
+      <button data-tab="reports">Reports</button>
+      <button data-tab="zones">Zones</button>
+      <button data-tab="tables">Tables</button>
+    </div>
+
+    <div data-pane="overview">
+      <div class="card"><h2>Rows per table</h2><div class="stats" id="tableStats"></div></div>
+      <div class="card"><h2>Drivers</h2><div class="row" id="driverStats"></div></div>
+      <div class="card"><h2>Live and upcoming rides (next 24 h)</h2><div class="tablewrap" id="liveRides"></div></div>
+    </div>
+
+    <div data-pane="proofs" class="hidden">
+      <div class="card">
+        <h2>Section 5.6 · Sample data and verification</h2>
+        <p class="muted small">Loads the sample data from the proposal and tries to break each rule. Everything runs inside one transaction that is rolled back, so the live data is untouched.</p>
+        <button class="btn primary" id="runVerify">Run verification tests</button>
+        <div id="verifyOut" style="margin-top:12px"></div>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <h2>Experiment 1 · Double booking</h2>
+          <p class="muted small">Creates N rides for the same slot and fires N simultaneous “accept” transactions for one driver, each on its own connection.</p>
+          <div class="row"><input type="number" id="dbN" value="100" min="2" max="200" style="width:90px"><button class="btn primary" id="runDouble">Run</button></div>
+          <div id="doubleOut" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <h2>Experiment 3 · Concurrent matching</h2>
+          <p class="muted small">R riders and D drivers request at the same instant using the matching query with <code>FOR UPDATE SKIP LOCKED</code>.</p>
+          <div class="row"><input type="number" id="mR" value="50" style="width:80px"> riders <input type="number" id="mD" value="10" style="width:80px"> drivers <button class="btn primary" id="runMatch">Run</button></div>
+          <div id="matchOut" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <h2>Experiment 4 · Spatial index</h2>
+          <p class="muted small">EXPLAIN ANALYZE of the matching query over 20,000 drivers, without and with the GiST index on <code>drivers.location</code> (rolled back afterwards).</p>
+          <button class="btn primary" id="runExplain">Run</button>
+          <div id="explainOut" style="margin-top:10px"></div>
+        </div>
+        <div class="card">
+          <h2>Experiment 5 · Isolation levels</h2>
+          <p class="muted small">The accept-ride transaction, 50 at once, under READ COMMITTED and SERIALIZABLE.</p>
+          <button class="btn primary" id="runIso">Run</button>
+          <div id="isoOut" style="margin-top:10px"></div>
+        </div>
+      </div>
+      <div class="card"><h2>Experiment 6 · Crash recovery</h2>
+        <p class="muted small" style="margin:0">Start a ride in the app, stop the server (Ctrl+C) and start it again. The ride comes back in the same status, because no ride state is held in server memory; only the socket map is.</p></div>
+    </div>
+
+    <div data-pane="reports" class="hidden">
+      <div class="card"><h2>Cancellation rate</h2><div class="tablewrap" id="repCancel"></div></div>
+      <div class="card"><h2>Driver utilisation (last 7 days)</h2><div class="tablewrap" id="repUtil"></div></div>
+      <div class="card"><h2>Rides per zone per day (last 14 days)</h2><div class="tablewrap" id="repZoneDay"></div></div>
+    </div>
+
+    <div data-pane="zones" class="hidden">
+      <div class="card">
+        <h2>Service zones</h2>
+        <p class="muted small">Click the map to add corners of a new zone, then name it and save. A zone with rides cannot be deleted (rides reference it with NO ACTION).</p>
+        <div id="zoneMap"></div>
+        <div class="row" style="margin-top:10px">
+          <input id="zoneName" placeholder="Zone name" style="max-width:240px">
+          <button class="btn primary" id="saveZone">Save zone</button>
+          <button class="btn" id="clearZone">Clear corners</button>
+          <span class="small muted" id="zoneCount">0 corners</span>
+        </div>
+        <div id="zoneList" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <div data-pane="tables" class="hidden">
+      <div class="card">
+        <div class="row"><h2 class="grow" style="margin:0">Browse a table</h2><select id="tableSel" style="max-width:260px"></select></div>
+        <p class="muted small">Latest 200 rows. Spatial columns are shown as WKT text.</p>
+        <div class="tablewrap" id="tableOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>
