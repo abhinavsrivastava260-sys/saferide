@@ -7,7 +7,7 @@ if [ "$(id -u)" -eq 0 ]; then SUDO=""; AS_PG="runuser -u postgres --"; else SUDO
 
 if ! command -v pg_ctlcluster >/dev/null 2>&1 || ! ls /usr/share/postgresql/*/extension/postgis.control >/dev/null 2>&1; then
   echo "Installing PostgreSQL and PostGIS (first time only)..."
-  $SUDO apt-get update -qq
+  $SUDO apt-get update -qq || echo "apt-get update reported errors (often a third-party repo); continuing"
   DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y -qq postgresql postgresql-contrib >/dev/null
   PGV=$(ls /usr/lib/postgresql | sort -n | tail -1)
   DEBIAN_FRONTEND=noninteractive $SUDO apt-get install -y -qq "postgresql-$PGV-postgis-3" >/dev/null
