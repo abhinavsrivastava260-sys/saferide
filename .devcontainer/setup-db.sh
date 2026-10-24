@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Installs PostgreSQL + PostGIS inside the codespace (if missing), starts it,
 # and creates the ridebook database with user postgres / password postgres.
+# Runs as root in the codespace; elsewhere it uses sudo -n so it fails instead of waiting for a password.
 set -e
-if [ "$(id -u)" -eq 0 ]; then SUDO=""; AS_PG="runuser -u postgres --"; else SUDO="sudo"; AS_PG="sudo -u postgres"; fi
+if [ "$(id -u)" -eq 0 ]; then SUDO=""; AS_PG="runuser -u postgres --"; else SUDO="sudo -n"; AS_PG="sudo -n -u postgres"; fi
 
 if ! command -v pg_ctlcluster >/dev/null 2>&1 || ! ls /usr/share/postgresql/*/extension/postgis.control >/dev/null 2>&1; then
   echo "Installing PostgreSQL and PostGIS (first time only)..."

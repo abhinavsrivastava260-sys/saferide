@@ -1,8 +1,16 @@
 {
   "name": "SafeRide (Node + PostgreSQL/PostGIS)",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bookworm",
-  "forwardPorts": [3000],
-  "portsAttributes": { "3000": { "label": "SafeRide", "onAutoForward": "openBrowser" } },
+  "remoteUser": "root",
+  "forwardPorts": [
+    3000
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "SafeRide",
+      "onAutoForward": "openBrowser"
+    }
+  },
   "postCreateCommand": "bash .devcontainer/setup-db.sh && npm install && npm run setup",
   "postStartCommand": "bash .devcontainer/setup-db.sh",
   "postAttachCommand": "echo 'Type: npm start   (then open port 3000 from the Ports tab)'"
