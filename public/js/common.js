@@ -53,11 +53,10 @@ function busy(btn, fn) {
 
 function baseMap(el) {
   const map = L.map(el).setView([12.965, 79.15], 13);
-  // CARTO's free basemap (OpenStreetMap data). The OSM tile servers block requests from
-  // forwarded hosts such as Codespaces, so they are not used directly.
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19, subdomains: 'abcd',
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  // Tiles come through our own server (src/tiles.js), which fetches and caches them.
+  L.tileLayer('/tiles/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   }).addTo(map);
   return map;
 }
